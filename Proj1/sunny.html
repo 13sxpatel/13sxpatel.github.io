@@ -1,0 +1,45 @@
+<h1> Project 1 Fragment Shader
+</h1>
+<script src=lib.js></script>
+
+
+<body bgcolor=black text=white>
+<center>
+<canvas id='canvas1' width=600 height=600></canvas>
+</center>
+</body>
+<script id='vs_script' type='x-shader/x-vertex'>
+   attribute vec3 aPos;
+   varying   vec3 vPos;
+   void main() {
+      gl_Position = vec4(aPos, 1.0);
+      vPos = aPos;
+   }
+</script>
+
+<script id='fss_script' type='x-shader/x-fragment'>
+
+---------------------------------------------------------------------
+varying vec3 vPos;                               
+uniform float uTime;
+void main() {
+   float x = vPos.x * sin(uTime);                             
+   float y = sin(vPos.y *vPos.x *100. * (tan(uTime/10.)))/.2;                             
+
+   vec3 c = vec3(.02,.12/(tan(uTime)/sin(uTime)),.2); 
+vec3 d = vec3(y, .2, x);                   
+   c = mix(d,c, .5*y);      
+
+   gl_FragColor = vec4(sqrt(c), 1.);             
+}
+
+---------------------------------------------------------------------
+
+</script>
+   
+<script>
+addTextEditor(fss_script.innerHTML.split('---------------------------------------------------------------------'),
+              function() { canvas1.setFragmentShader(this.value); });
+gl_start(canvas1, vs_script.innerHTML);
+</script>
+
