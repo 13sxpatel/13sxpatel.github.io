@@ -1,0 +1,149 @@
+<table>
+
+
+
+<tr>
+<td><canvas id=canvas2 width=900 height=600></td>
+<td width=50></td>
+<td>
+Lets Play a game, use arrows to move and collect carrots.
+Collect 20 carrots to win in 40 seconds!!
+
+</td>
+</tr>
+
+</table>
+
+<script src=drawlib1.js></script>
+<script>
+   
+
+
+   let bg = false;
+   let bgImage = new Image();
+   bgImage.onload = function () {
+      bg = true;
+   };
+   bgImage.src = "background.jpg";
+
+   let bunnyReady = false;
+   let bunnyImage = new Image();
+   bunnyImage.onload = function () {
+      bunnyReady = true;
+   };
+   bunnyImage.src = "bunny.png";
+
+   let carrotReady = false;
+   let carrotImage = new Image();
+   carrotImage.onload = function () {
+      carrotReady = true;
+   };
+   carrotImage.src = "carrot.png";
+
+   let bunny  = {
+      speed:10, x:450, y:300
+   };
+   let carrot = {x:Math.floor(Math.random() * (850) + 40), y:Math.floor(Math.random() * (550) + 40)};
+   let eaten = 0;
+
+    let keysDown = {};
+
+     addEventListener("keydown", function(e){
+      keysDown[e.keyCode] = true;
+     }, false);
+
+     addEventListener("keyup", function(e){
+      delete keysDown[e.keyCode];
+     }, false);
+
+     let reset = function(){
+         bunny.x = 450;
+         bunny.y = 300;
+         carrot.x = Math.floor(Math.random() * (800) + 40);
+         carrot.y = Math.floor(Math.random() * (500) + 40);
+         if(carrot.x>840 || carrot.y> 540){
+            reset();
+         }
+     }
+   canvas2.update = function(g) {
+
+      g.lineWidth = 5;
+
+      g.beginPath();
+      g.moveTo(0, 0);
+      g.lineTo(this.width, 0);
+      g.lineTo(this.width, this.height);
+      g.lineTo(0, this.height);
+      g.lineTo(0, 0);
+      g.stroke();
+ 
+      if (bg && carrotReady && bunnyReady) {
+          g.drawImage(bgImage, 0, 0);
+          g.drawImage(carrotImage, carrot.x,carrot.y);
+          g.drawImage(bunnyImage, bunny.x , bunny.y);
+      }
+   if(((time*1.1)-3)<40 && eaten<20){
+      if(38 in keysDown){
+         if(bunny.y >0){
+            bunny.y -= bunny.speed;
+         }
+      }
+      if(40 in keysDown){
+         if(bunny.y<550){
+            
+             bunny.y += bunny.speed;
+         }
+      }
+      if(37 in keysDown){
+         if(bunny.x >0){
+            bunny.x -= bunny.speed;
+         }
+      }
+      if(39 in keysDown){
+         if(bunny.x<850){
+            console.log(bunny.x);
+             bunny.x += bunny.speed;
+         }
+        
+      }
+
+   if ( bunny.x <= (carrot.x + 32) && carrot.x <= (bunny.x + 32) && bunny.y <= (carrot.y + 32) && carrot.y <= (bunny.y + 32)) {
+      ++eaten;
+      reset();
+   }
+  
+      g.fillStyle = "rgb(250, 250, 250)";
+   g.font = "24px Helvetica";
+   g.textAlign = "left";
+   g.textBaseline = "top";
+   g.fillText("Carrots Eaten: " + eaten, 32, 32);
+   g.fillText("Time :" + Math.floor((time*1.1)-3),32, 70)
+      
+   }
+   else{
+      bunny.x = 1000;
+      bunny.y = 1000;
+      carrot.x = 1000;
+      carrot.y = 1000;
+      if(eaten==20){
+         g.fillStyle = "rgb(250, 250, 250)";
+         g.font = "90px Helvetica";
+         g.textAlign = "middle";
+         g.textBaseline = "middle";
+         g.fillText("You Win!! " ,250, 300);
+      }
+      else{
+         g.fillStyle = "rgb(250, 0, 0)";
+         g.font = "90px Helvetica";
+         g.textAlign = "middle";
+         g.textBaseline = "middle";
+         g.fillText("You Lose!! ", 200, 300);
+      }
+   }
+   
+   }
+
+   draw2DCanvases([  canvas2 ]);
+</script>
+
+
