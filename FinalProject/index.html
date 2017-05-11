@@ -1,0 +1,261 @@
+<script src=M.js></script>
+<script src=lib2k.js></script>
+<script src=SHAPE.js></script>
+
+<body bgcolor=black text=white>
+<center>
+<canvas id='canvas1' width=900 height=700></canvas>
+<h3 style="color:white;"> Hi , move arrow keys to move figure back and forth and left and right. Watch the wheels turn as well as the face. Extra credit implements much better game with same concept using three.js and webgl </h3>
+</center>
+</body>
+
+<script>
+
+var vs = '\
+attribute vec3 aPos, aNor;\n\
+attribute vec2 aUV;\n\
+varying   vec3 vPos, vNor;\n\
+varying   vec2 vUV;\n\
+uniform   mat4 matrix, invMatrix;\n\
+void main() {\n\
+   vec4 pos = matrix * vec4(aPos, 1.);\n\
+   vec4 nor = vec4(aNor, 0.) * invMatrix;\n\
+   gl_Position = pos;\n\
+   vPos = pos.xyz;\n\
+   vNor = nor.xyz;\n\
+   vUV  = aUV;\n\
+}\n\
+';
+
+var fs1 = '\
+varying vec3 vPos, vNor;\n\
+varying vec2 vUV;\n\
+void main() {\n\
+   vec3 normal = normalize(vNor);\n\
+   vec3 c = vec3(.1,.1,.1);\n\
+   c += vec3(.7,.7,1.) * max(0.,dot(normal, vec3( .7, .7, .7)));\n\
+   c += vec3(.5,.3,.1) * max(0.,dot(normal, vec3(-.7,-.7,-.7)));\n\
+   gl_FragColor = vec4(sqrt(c), 1.);\n\
+}\n\
+';
+
+var fs2 = '\
+varying vec3 vPos, vNor;\n\
+varying vec2 vUV;\n\
+uniform sampler2D uSampler;\n\
+void main() {\n\
+   vec3 normal = normalize(vNor);\n\
+   vec3 c = vec3(.1,.1,.1);\n\
+   c += vec3(.7,.7,1.) * max(0.,dot(normal, vec3( .7, .7, .7)));\n\
+   c += vec3(.5,.3,.1) * max(0.,dot(normal, vec3(-.7,-.7,-.7)));\n\
+   vec4 texture = texture2D(uSampler, vUV);\n\
+   c *= texture.rgb;\n\
+   gl_FragColor = vec4(sqrt(c), 1.);\n\
+}\n\
+';
+
+   var head1, head2, head3, body, legs, halo, eye2, cone1, cone2, cone3, cone4, cone5, cone6;
+
+   var scene = new Scene();
+
+////////////////CREATE HEAD////////////////////////
+   var material1 = new Material(vs, fs2);
+
+   var material2 = new Material(vs, fs2);
+   var material3 = new Material(vs, fs2);
+
+   material1.setTexture('imgs/bricks.png');
+   material2.setTexture('imgs/polkadots.jpg');
+   material3.setTexture('imgs/brick.png');
+
+   head1 = new SceneObject();
+   head1.setVertices(SHAPE.cone(200));
+   console.log(SHAPE.cone(200))
+   head1.setMaterial(material2);
+   scene.addObject(head1);
+
+
+   head2 = new SceneObject();
+   head2.setVertices(SHAPE.tube(20));
+   head2.setMaterial(material1);
+   scene.addObject(head2);
+
+   head3 = new SceneObject();
+   head3.setVertices(SHAPE.cone(20));
+   head3.setMaterial(material2);
+   scene.addObject(head3);
+
+   body = new SceneObject();
+   body.setVertices(SHAPE.body(20));
+   body.setMaterial(material2);
+   scene.addObject(body);
+
+   legs = new SceneObject();
+   legs.setVertices(SHAPE.body(20));
+   legs.setMaterial(material2);
+   scene.addObject(legs);
+
+
+      halo = new SceneObject();
+      halo.setVertices(SHAPE.halo(20));
+      halo.setMaterial(material2);
+      scene.addObject(halo);
+
+      eye2 = new SceneObject();
+      eye2.setVertices(SHAPE.disk(20));
+      eye2.setMaterial(material2);
+      scene.addObject(eye2);
+
+      cone1 = new SceneObject();
+      cone1.setVertices(SHAPE.cone(20));
+      cone1.setMaterial(material1);
+      scene.addObject(cone1);
+
+
+////////////////CREATE HEAD////////////////////////
+   canvas1.scene = scene;
+
+   var m = M.identityMatrix();
+   var k =1;
+   var j = 0;
+   let xx = 0;
+   let yy = 0;
+   let zz = 0
+   var l = 0;
+
+
+   addEventListener("keydown", function(e){
+     console.log(e.keyCode);
+     if(e.keyCode==87){
+       yy+=.75;
+     }
+     else if( e.keyCode == 83){
+       yy-=.75;
+     }
+    if(e.keyCode==40){
+      k +=.01;
+      zz+=.75;
+
+
+    }
+    else if(e.keyCode==38){
+      k-=.01
+      zz-=.75;
+    }
+    else if(e.keyCode==39){
+      j+=.05;
+      l-=.05
+      xx+=.75
+
+
+    }
+    else if(e.keyCode==37){
+      j-=.05;
+      l+=.05
+      xx-=.75
+    }
+   });
+
+   if(xx>=6 && xx<=12.75 && zz<=12.25){
+     cone1.setMaterial(material3);
+   }
+gl_start(canvas1,
+   function(time) {
+     console.log(xx + " <--xx yy-->" + yy + "  zz-->" + zz)
+     let joey = function(time){
+
+
+      M.identity(m);
+      M.rotateX(m, 1.4)
+      M.scale(m, k)
+      M.translate(m, [j,0,0])
+      //M.rotateY(m, time/4);
+      //
+      ////////////////CREATE HEAD////////////////////////
+      M.save(m);
+         M.scale(m, .1, .2, .1);
+
+         M.translate(m, [1.7,0,0])
+         M.rotateY(m, 1.57)
+
+         M.rotateZ(m, time/4);
+         head1.setMatrix(m);
+
+      M.restore(m);
+
+      M.save(m);
+         //M.rotateX(m, time);
+         M.scale(m,  .1, .2,.1 );
+         M.rotateY(m, 1.57);
+
+         M.translate(m, [0, 0 , 0])//first is y
+         head2.setMatrix(m);
+      M.restore(m);
+
+
+
+      M.save(m);
+         M.scale(m,  .1,.2,.1);
+         M.rotateY(m, -1.57)
+         M.translate(m, [0,0,1.7])
+         head3.setMatrix(m);
+      M.restore(m);
+
+      M.save(m);
+         M.scale(m,  .1,.2,.39);
+         M.rotateY(m, 0)
+         M.translate(m, [0,-.3,.7])
+         body.setMatrix(m);
+      M.restore(m);
+
+      M.save(m);
+         M.scale(m,  .3,.1,.2);
+         M.rotateY(m, 1.57)
+
+         M.rotateX(m,l )
+         M.translate(m, [-2.34,.0,0])
+         legs.setMatrix(m);
+      M.restore(m);
+
+      M.save(m);
+         M.scale(m,  .2,.1,.2);
+         M.rotateY(m, 0)
+         M.rotateX(m, .3)
+         M.translate(m, [0.,0,-.2])
+         halo.setMatrix(m);
+      M.restore(m);
+
+      M.save(m);
+         M.scale(m,  .2,.1,.2);
+         M.rotateY(m, 0)
+         M.rotateX(m, .3)
+         M.translate(m, [0.,0,2])
+         eye2.setMatrix(m);
+      M.restore(m);
+      ////////////////END HEAD////////////////////////
+    }
+
+    let smith = function(time){
+      M.identity(m);
+      M.rotateX(m, 1.4)
+
+      M.save(m);
+         M.scale(m, .1, .2, .2);
+
+         M.translate(m, [7,0,2])
+         M.rotateY(m, 3.15)
+
+         M.rotateX(m, -.4);
+         cone1.setMatrix(m);
+
+      M.restore(m);
+
+
+
+    }
+    joey(time);
+    smith(time);
+   }
+);
+
+</script>
